@@ -19,13 +19,17 @@ def main():
                 #set root password
                 ssh.exec_command("echo -e '%s\n%s\n%s' | sudo -S passwd root" % (args.password, args.root_password, args.root_password))
                 #enable root ssh login and restart ssh
-                ssh.exec_command("sudo sed -i '/PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config")
-                ssh.exec_command('sudo service ssh restart')
-                ssh.close()
+                ssh.exec_command("echo %s | sudo -S sed -i '/PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config" % args.password)
+                ssh.exec_command('echo %s | sudo -S service ssh restart' % args.password)
                 print "SUCESSFULLY CONFIGURED THE SERVER %s " % args.host
+        except paramiko.AuthenticationException:
+                print "Authentication failed"
+        except paramiko.SSHException:
+                print "Failed to ssh to host %s" % args.host
         except:
                 print "FAILED!! to configure the server"
-
+        finally:
+                ssh.close()
 
 if __name__ == '__main__':
         main()
